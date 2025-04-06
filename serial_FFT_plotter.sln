@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33529.622
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "serial_FFT_plotter", "serial_FFT_plotter.csproj", "{9FC79E65-92D6-45CF-B622-0B98B87331A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FC79E65-92D6-45CF-B622-0B98B87331A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FC79E65-92D6-45CF-B622-0B98B87331A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FC79E65-92D6-45CF-B622-0B98B87331A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FC79E65-92D6-45CF-B622-0B98B87331A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B0D5BAA0-CC6F-4FF1-BB03-951E3C2AABD0}
+	EndGlobalSection
+EndGlobal
