@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/
+/bin
+/obj
+/bin/Debug
+/obj/Debug
+/obj/Debug/serial_FFT_plotter.pdb
