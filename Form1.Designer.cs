@@ -37,6 +37,7 @@ namespace serial_FFT_plotter
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.FFT_pic = new System.Windows.Forms.PictureBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.auto_explain_but = new System.Windows.Forms.Button();
             this.auto_export_but = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.serial_port_baud_box = new System.Windows.Forms.ComboBox();
@@ -85,13 +86,14 @@ namespace serial_FFT_plotter
             this.inferenceUsingBTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inferenceUsingBTFallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aIExplainableViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.joblib_opener = new System.Windows.Forms.OpenFileDialog();
-            this.csv_opener = new System.Windows.Forms.OpenFileDialog();
             this.exportOptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportBT01BT02ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportBT03BT04ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.askBeforeSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.auto_explain_but = new System.Windows.Forms.Button();
+            this.joblib_opener = new System.Windows.Forms.OpenFileDialog();
+            this.csv_opener = new System.Windows.Forms.OpenFileDialog();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.capture_pic)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -204,6 +206,17 @@ namespace serial_FFT_plotter
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Setting";
+            // 
+            // auto_explain_but
+            // 
+            this.auto_explain_but.Location = new System.Drawing.Point(446, 21);
+            this.auto_explain_but.Name = "auto_explain_but";
+            this.auto_explain_but.Size = new System.Drawing.Size(82, 87);
+            this.auto_explain_but.TabIndex = 26;
+            this.auto_explain_but.TabStop = false;
+            this.auto_explain_but.Text = "Auto explain capture data";
+            this.auto_explain_but.UseVisualStyleBackColor = true;
+            this.auto_explain_but.Click += new System.EventHandler(this.button2_Click_3);
             // 
             // auto_export_but
             // 
@@ -475,7 +488,8 @@ namespace serial_FFT_plotter
             this.dataToolStripMenuItem,
             this.viewToolStripMenuItem,
             this.aIOptionToolStripMenuItem,
-            this.exportOptionToolStripMenuItem});
+            this.exportOptionToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1096, 24);
@@ -622,33 +636,23 @@ namespace serial_FFT_plotter
             // inferenceUsingBTToolStripMenuItem
             // 
             this.inferenceUsingBTToolStripMenuItem.Name = "inferenceUsingBTToolStripMenuItem";
-            this.inferenceUsingBTToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.inferenceUsingBTToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.inferenceUsingBTToolStripMenuItem.Text = "inference using BT (Bio)";
             this.inferenceUsingBTToolStripMenuItem.Click += new System.EventHandler(this.inferenceUsingBTToolStripMenuItem_Click);
             // 
             // inferenceUsingBTFallToolStripMenuItem
             // 
             this.inferenceUsingBTFallToolStripMenuItem.Name = "inferenceUsingBTFallToolStripMenuItem";
-            this.inferenceUsingBTFallToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.inferenceUsingBTFallToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.inferenceUsingBTFallToolStripMenuItem.Text = "inference using BT (Fall)";
             this.inferenceUsingBTFallToolStripMenuItem.Click += new System.EventHandler(this.inferenceUsingBTFallToolStripMenuItem_Click);
             // 
             // aIExplainableViewToolStripMenuItem
             // 
             this.aIExplainableViewToolStripMenuItem.Name = "aIExplainableViewToolStripMenuItem";
-            this.aIExplainableViewToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.aIExplainableViewToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.aIExplainableViewToolStripMenuItem.Text = "AI explainable view";
             this.aIExplainableViewToolStripMenuItem.Click += new System.EventHandler(this.aIExplainableViewToolStripMenuItem_Click);
-            // 
-            // joblib_opener
-            // 
-            this.joblib_opener.FileName = "model_file";
-            this.joblib_opener.Filter = "Model file|*.onnx;|All files (*.*)|*.*";
-            // 
-            // csv_opener
-            // 
-            this.csv_opener.FileName = "BT_file";
-            this.csv_opener.Filter = "CSV file|*.csv;|All files (*.*)|*.*";
             // 
             // exportOptionToolStripMenuItem
             // 
@@ -663,34 +667,48 @@ namespace serial_FFT_plotter
             // exportBT01BT02ToolStripMenuItem
             // 
             this.exportBT01BT02ToolStripMenuItem.Name = "exportBT01BT02ToolStripMenuItem";
-            this.exportBT01BT02ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportBT01BT02ToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.exportBT01BT02ToolStripMenuItem.Text = "Export BT01 BT02";
             this.exportBT01BT02ToolStripMenuItem.Click += new System.EventHandler(this.exportBT01BT02ToolStripMenuItem_Click);
             // 
             // exportBT03BT04ToolStripMenuItem
             // 
             this.exportBT03BT04ToolStripMenuItem.Name = "exportBT03BT04ToolStripMenuItem";
-            this.exportBT03BT04ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportBT03BT04ToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.exportBT03BT04ToolStripMenuItem.Text = "Export BT03 BT04";
             this.exportBT03BT04ToolStripMenuItem.Click += new System.EventHandler(this.exportBT03BT04ToolStripMenuItem_Click);
             // 
             // askBeforeSaveToolStripMenuItem
             // 
             this.askBeforeSaveToolStripMenuItem.Name = "askBeforeSaveToolStripMenuItem";
-            this.askBeforeSaveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.askBeforeSaveToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.askBeforeSaveToolStripMenuItem.Text = "Ask before save";
             this.askBeforeSaveToolStripMenuItem.Click += new System.EventHandler(this.askBeforeSaveToolStripMenuItem_Click);
             // 
-            // auto_explain_but
+            // joblib_opener
             // 
-            this.auto_explain_but.Location = new System.Drawing.Point(446, 21);
-            this.auto_explain_but.Name = "auto_explain_but";
-            this.auto_explain_but.Size = new System.Drawing.Size(82, 87);
-            this.auto_explain_but.TabIndex = 26;
-            this.auto_explain_but.TabStop = false;
-            this.auto_explain_but.Text = "Auto explain capture data";
-            this.auto_explain_but.UseVisualStyleBackColor = true;
-            this.auto_explain_but.Click += new System.EventHandler(this.button2_Click_3);
+            this.joblib_opener.FileName = "model_file";
+            this.joblib_opener.Filter = "Model file|*.onnx;|All files (*.*)|*.*";
+            // 
+            // csv_opener
+            // 
+            this.csv_opener.FileName = "BT_file";
+            this.csv_opener.Filter = "CSV file|*.csv;|All files (*.*)|*.*";
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "&Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -790,6 +808,8 @@ namespace serial_FFT_plotter
         private System.Windows.Forms.ToolStripMenuItem exportBT03BT04ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem askBeforeSaveToolStripMenuItem;
         private System.Windows.Forms.Button auto_explain_but;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
 

@@ -1558,5 +1558,15 @@ namespace serial_FFT_plotter
 
             }
         }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                    "Serial FFT Plotter v1.1\nCreated by Somsin Tongkrairat",
+                    "About Serial FFT Plotter",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+            );
+        }
     }
 }
