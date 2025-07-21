@@ -97,15 +97,15 @@ namespace serial_FFT_plotter
         {
             //Console.WriteLine(serialPort.BytesToRead);
             byte[] data = new byte[serialPort.BytesToRead];
-            
+
             serialPort.Read(data, 0, data.Length);
 
-            for(int i=0;i< data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 process_serial(data[i]);
-                
+
             }
-            
+
         }
 
         private void process_serial(byte data)
@@ -113,14 +113,14 @@ namespace serial_FFT_plotter
             if (serial_state == 0) // idle
             {
                 //Console.WriteLine(data);
-                if((data & 0xF0) == 0x40) // start of streamming
+                if ((data & 0xF0) == 0x40) // start of streamming
                 {
                     serial_state = 1;
                     serial_buffer_data = 0;
                 }
                 if ((data & 0xF0) == 0x50) // start of receive capture signal
                 {
-                    serial_state = 20;                  
+                    serial_state = 20;
                 }
                 if ((data & 0xF0) == 0x60) // start of receive FFT signal
                 {
@@ -131,7 +131,7 @@ namespace serial_FFT_plotter
                     serial_state = 40;
                 }
             }
-            else if (serial_state >=1 && serial_state <= 4) // receiving streamming data
+            else if (serial_state >= 1 && serial_state <= 4) // receiving streamming data
             {
                 serial_buffer_data |= (UInt32)data << ((4 - serial_state) * 8);
                 if (serial_state == 4) // convert data
@@ -186,7 +186,7 @@ namespace serial_FFT_plotter
                             if (askBeforeSaveToolStripMenuItem.Checked == true)
                             {
                                 DialogResult dialogResult = MessageBox.Show("Do you want to save this signal", "Save file confirm", MessageBoxButtons.YesNo);
-                                if(dialogResult != DialogResult.Yes)
+                                if (dialogResult != DialogResult.Yes)
                                 {
                                     save_require = false;
                                 }
@@ -275,7 +275,7 @@ namespace serial_FFT_plotter
                     {
                         serial_state = 0; // error
                     }
-                       
+
                     serial_buffer_data = 0;
                 }
                 receive_data_counter++;
@@ -284,6 +284,11 @@ namespace serial_FFT_plotter
                     if (FFT_recieved_size > 0)
                     {
                         FFT_pic.Invalidate();
+                        if (auto_explain_data_enable == true)
+                        {
+                            Task.Run(() => inference_from_serial());
+                        }
+
                     }
                     serial_state = 0;
                     /// test
@@ -314,8 +319,8 @@ namespace serial_FFT_plotter
                 if (receive_data_counter >= device_message_recieved_size) // finished receive message
                 {
                     device_message_count++;
-                    device_message_box.Text = device_message_count.ToString() + " : " + System.Text.Encoding.ASCII.GetString(device_message_buffer, 0,receive_data_counter);
-                    
+                    device_message_box.Text = device_message_count.ToString() + " : " + System.Text.Encoding.ASCII.GetString(device_message_buffer, 0, receive_data_counter);
+
                     serial_state = 0;
                 }
             }
@@ -332,7 +337,7 @@ namespace serial_FFT_plotter
             }
 
             serial_port_baud_box.SelectedIndex = 3;
-            
+
             stream_draw_timer.Start();
 
 
@@ -419,9 +424,9 @@ namespace serial_FFT_plotter
             Pen base_line_pen = new Pen(Brushes.DarkGreen, 1.0F);
             float max = 0, min = 0, bound;
 
-            for(int i = 0; i < capture_recieved_size; i++)
+            for (int i = 0; i < capture_recieved_size; i++)
             {
-                if(capture_buffer[i] > 0 && capture_buffer[i] > max)
+                if (capture_buffer[i] > 0 && capture_buffer[i] > max)
                 {
                     max = capture_buffer[i];
                 }
@@ -431,7 +436,7 @@ namespace serial_FFT_plotter
                 }
             }
             bound = Math.Abs(max);
-            if(Math.Abs(min) > bound)
+            if (Math.Abs(min) > bound)
             {
                 bound = Math.Abs(min);
             }
@@ -460,9 +465,9 @@ namespace serial_FFT_plotter
             for (int i = 0; i < capture_recieved_size; i++)
             {
                 float draw_y = base_line_y + (capture_buffer[i] * line_y_draw_multipiler);
-                if(i > 0)
+                if (i > 0)
                 {
-                    if(draw_y > 500)
+                    if (draw_y > 500)
                     {
                         draw_y = 500;
                     }
@@ -471,7 +476,7 @@ namespace serial_FFT_plotter
                         draw_y = -500;
                     }
                     //e.Graphics.FillEllipse(Brushes.LightBlue, i, draw_y, 2, 2);
-                    e.Graphics.DrawLine(Pens.Cyan, i - 1, last_draw_y,i, draw_y);
+                    e.Graphics.DrawLine(Pens.Cyan, i - 1, last_draw_y, i, draw_y);
                 }
                 last_draw_y = draw_y;
             }
@@ -491,7 +496,7 @@ namespace serial_FFT_plotter
 
         private void FFT_pic_Paint(object sender, PaintEventArgs e)
         {
-            if(clear_FFT_flag == true)
+            if (clear_FFT_flag == true)
             {
                 e.Graphics.Clear(Color.Black);
                 clear_FFT_flag = false;
@@ -510,7 +515,7 @@ namespace serial_FFT_plotter
                 }
             }
 
-            if(max < 0.000001) // prevent overflow
+            if (max < 0.000001) // prevent overflow
             {
                 max = 0.000001F;
             }
@@ -531,7 +536,7 @@ namespace serial_FFT_plotter
                 for (int i = 2; i < open_size / 2; i++)
                 {
                     float draw_y = base_line_y - (FFT_buffer[i] * line_y_draw_multipiler);
-                    if(fFTLogScaleToolStripMenuItem.Checked == true)
+                    if (fFTLogScaleToolStripMenuItem.Checked == true)
                     {
                         draw_y = base_line_y - ((float)Math.Log(FFT_buffer[i]) * line_y_draw_multipiler);
                     }
@@ -548,7 +553,7 @@ namespace serial_FFT_plotter
                     e.Graphics.DrawLine(Pens.LightBlue, i, draw_y, i, FFT_pic.Height);
                 }
 
-                if(markIndex129BT01BT02ToolStripMenuItem.Checked == true)
+                if (markIndex129BT01BT02ToolStripMenuItem.Checked == true)
                 {
                     e.Graphics.DrawLine(Pens.LightBlue, 129, 0, 129, FFT_pic.Height);
                 }
@@ -578,20 +583,20 @@ namespace serial_FFT_plotter
                         draw_y = -1080;
                     }
                     //e.Graphics.FillEllipse(Brushes.LightBlue, i, draw_y, 2, 2);
-                    e.Graphics.DrawLine(Pens.LightBlue, i*2, draw_y, (i-1)*2, last_draw_y);
+                    e.Graphics.DrawLine(Pens.LightBlue, i * 2, draw_y, (i - 1) * 2, last_draw_y);
 
                     last_draw_y = draw_y;
                 }
 
                 if (markIndex129BT01BT02ToolStripMenuItem.Checked == true)
                 {
-                    e.Graphics.DrawLine(Pens.LightBlue, 129*2, 0, 129*2, FFT_pic.Height);
+                    e.Graphics.DrawLine(Pens.LightBlue, 129 * 2, 0, 129 * 2, FFT_pic.Height);
                 }
             }
 
             e.Graphics.DrawString("max =" + max.ToString("F4") + "idx -> [" + max_idx + "]", DefaultFont, Brushes.Pink, 10, 10);
 
-            if(cursor_mode == true) // draw cursor
+            if (cursor_mode == true) // draw cursor
             {
                 var right_alignment = new StringFormat() { Alignment = StringAlignment.Far };
                 e.Graphics.DrawString("(x -> " + cursor_x.ToString() + ",y -> " + cursor_y.ToString() + ")", DefaultFont, Brushes.Pink, FFT_pic.Width - 50, 12, right_alignment);
@@ -622,7 +627,7 @@ namespace serial_FFT_plotter
 
                 Array.Copy(FFT_buffer, mqtt_FFT_buffer, 512);
                 mqtt_FFT_message = "[";
-                for(int i=0;i< 512; i++)
+                for (int i = 0; i < 512; i++)
                 {
                     mqtt_FFT_message += mqtt_FFT_buffer[i].ToString("0.0");
                     if (i < 511)
@@ -718,7 +723,7 @@ namespace serial_FFT_plotter
 
             saving_form formatter_form = new saving_form();
             DialogResult result = formatter_form.ShowDialog();
-            if(result == DialogResult.OK)
+            if (result == DialogResult.OK)
             {
                 saveFileDialog1.FileName = formatter_form.file_name;
             }
@@ -732,10 +737,10 @@ namespace serial_FFT_plotter
             {
                 return;
             }
-         
+
             StreamWriter sw = new StreamWriter(saveFileDialog1.FileName, true, Encoding.ASCII);
 
-            for (int i=0;i < record_data.Count; i++)
+            for (int i = 0; i < record_data.Count; i++)
             {
                 //Console.WriteLine(record_data[i]);
                 sw.WriteLine(record_data[i].ToString());
@@ -743,7 +748,7 @@ namespace serial_FFT_plotter
             int data_cnt = record_data.Count;
             record_data.Clear();
             sw.Close();
-            MessageBox.Show("export " + data_cnt + " data point completed!");      
+            MessageBox.Show("export " + data_cnt + " data point completed!");
 
             button4.Enabled = true;
             button5.Enabled = false;
@@ -757,9 +762,9 @@ namespace serial_FFT_plotter
         private void button6_Click(object sender, EventArgs e)
         {
             record_data = new List<float>();
-            
+
             DialogResult result = openFileDialog1.ShowDialog();
-            if(result != DialogResult.OK)
+            if (result != DialogResult.OK)
             {
                 return;
             }
@@ -773,11 +778,11 @@ namespace serial_FFT_plotter
                 //write the line to console window
                 Console.WriteLine(line);
                 float value;
-                if(float.TryParse(line,out value))
+                if (float.TryParse(line, out value))
                 {
                     record_data.Add(value);
                 }
-                
+
                 //Read the next line
                 line = sr.ReadLine();
             }
@@ -804,11 +809,11 @@ namespace serial_FFT_plotter
             num_bar_draw = true;
 
             trackBar1.Value = 0;
-            move_track_bar(0,open_size);
+            move_track_bar(0, open_size);
             streaming_pic.Invalidate();
 
             capture_recieved_size = stream_buffer_size;
-            float plot_multipiler = (float)record_data.Count / (float)stream_buffer_size;           
+            float plot_multipiler = (float)record_data.Count / (float)stream_buffer_size;
             for (int i = 0; i < stream_buffer_size; i++)
             {
                 int idx = (int)(plot_multipiler * i);
@@ -825,7 +830,7 @@ namespace serial_FFT_plotter
 
         }
 
-        void move_track_bar(int pos,int size)
+        void move_track_bar(int pos, int size)
         {
             int start_idx;
             if (record_data.Count < size)
@@ -837,9 +842,9 @@ namespace serial_FFT_plotter
                 start_idx = (int)((record_data.Count - size) * ((float)pos / trackBar1.Maximum));
             }
             //load file to data capture
-            for(int i=0;i< size; i++)
+            for (int i = 0; i < size; i++)
             {
-                if ( + i < record_data.Count)
+                if (+i < record_data.Count)
                 {
                     stream_buffer[i] = record_data[start_idx + i];
                 }
@@ -860,7 +865,7 @@ namespace serial_FFT_plotter
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            move_track_bar(trackBar1.Value,open_size);
+            move_track_bar(trackBar1.Value, open_size);
 
             streaming_pic.Invalidate();
             capture_pic.Invalidate();
@@ -874,9 +879,9 @@ namespace serial_FFT_plotter
         private void button7_Click(object sender, EventArgs e)
         {
             //stream_buffer;
-            
+
             Complex[] buffer = new Complex[open_size];
-            for(int i=0;i< open_size; i++)
+            for (int i = 0; i < open_size; i++)
             {
                 buffer[i] = stream_buffer[i];
             }
@@ -1103,7 +1108,7 @@ namespace serial_FFT_plotter
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            if(auto_export_data_enable == false)
+            if (auto_export_data_enable == false)
             {
                 if (auto_export_save_dialog.ShowDialog() == DialogResult.OK)
                 {
@@ -1124,7 +1129,7 @@ namespace serial_FFT_plotter
 
         private void button2_Click_2(object sender, EventArgs e)
         {
-            if(FFT_style == 0)
+            if (FFT_style == 0)
             {
                 FFT_style = 1;
                 switchFFTStylebarToolStripMenuItem.Text = "switch FFT style (graph)";
@@ -1150,7 +1155,7 @@ namespace serial_FFT_plotter
 
         private void openDataFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            button6_Click(null, null); 
+            button6_Click(null, null);
         }
 
         private void openFFTFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1263,7 +1268,7 @@ namespace serial_FFT_plotter
             SetaiMessage("bio Inference result: [" + out_prob[1].ToString() + "," + out_prob[0].ToString() + "]");
 
             // show to FFT view
-            for(int i = 0; i < 258; i++)
+            for (int i = 0; i < 258; i++)
             {
                 FFT_buffer[i] = (float)inputData[i];
             }
@@ -1347,7 +1352,7 @@ namespace serial_FFT_plotter
             }
         }
 
-   
+
         public static double Predict(
             double[] input,
             double[,] Layer0_Weights,
@@ -1358,13 +1363,13 @@ namespace serial_FFT_plotter
 
             // Layer 0: input → hidden
             int c = Layer0_Weights.GetLength(0);
-            int r = Layer0_Weights.GetLength(1);           
+            int r = Layer0_Weights.GetLength(1);
             double[] hidden_raw = new double[r];
             double output_raw = -99.99;
-            for (int i=0;i< r; i++)
-            { 
+            for (int i = 0; i < r; i++)
+            {
                 double sum = Layer0_Biases[i];
-                for(int j = 0; j < c; j++)
+                for (int j = 0; j < c; j++)
                 {
                     sum += Layer0_Weights[j, i] * input[j];
                 }
@@ -1395,7 +1400,7 @@ namespace serial_FFT_plotter
         double[,] W2, double[] b2 // weights and bias of layer 2 (W2: [h,o])
         )
         {
-            
+
             int inputSize = input.Length;
             int hiddenSize = b1.Length;
             int outputSize = b2.Length;
@@ -1434,7 +1439,7 @@ namespace serial_FFT_plotter
                 double sum = 0;
                 for (int j = 0; j < hiddenSize; j++)
                 {
-                    sum += W1[i, j] * W2[j,0] * hidden[j];  // Use activated value
+                    sum += W1[i, j] * W2[j, 0] * hidden[j];  // Use activated value
                 }
                 contribution[i] = input[i] * sum;
             }
@@ -1444,7 +1449,7 @@ namespace serial_FFT_plotter
 
         private void aIExplainableViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(explainview.IsDisposed == true)
+            if (explainview.IsDisposed == true)
             {
                 explainview = new aiexplainview();
             }
@@ -1478,6 +1483,79 @@ namespace serial_FFT_plotter
 
                 auto_explain_data_enable = false;
                 auto_explain_but.BackColor = SystemColors.Control;
+            }
+        }
+
+        public void inference_from_serial()
+        {
+            double[,] out_prob = new double[,] { { 0, 0 }, { 0, 0 } };
+            bool got_bt04 = true;
+            if (FFT_buffer[258] == 0 && FFT_buffer[259] == 0 && FFT_buffer[300] == 0)
+            {
+                got_bt04 = false;
+            }
+
+            double[] bio_input = new double[258];
+            Array.Copy(FFT_buffer, 0, bio_input, 0, 258);
+
+            out_prob[0, 0] = Predict(
+                bio_input,
+                Bio_ModelWeights.Layer0_Weights,
+                Bio_ModelWeights.Layer0_Biases,
+                Bio_ModelWeights.Layer1_Weights,
+                Bio_ModelWeights.Layer1_Biases
+            );
+            out_prob[0, 1] = 1.0f - out_prob[0, 0];
+
+            // calculate explaination
+            if (explainview.IsDisposed == false)
+            {
+                explainview.set_bio_local_explain(
+                    LocalFeatureContribution(
+                    bio_input,
+                    Bio_ModelWeights.Layer0_Weights,
+                    Bio_ModelWeights.Layer0_Biases,
+                    Bio_ModelWeights.Layer1_Weights,
+                    Bio_ModelWeights.Layer1_Biases
+                     )
+                );
+            }
+
+            if (got_bt04 == false)
+            {
+                SetaiMessage("Bio result: [" + out_prob[0, 1].ToString("F5") + "," + out_prob[0, 0].ToString("F5") + "] , []");
+                explainview.valid_local_fall = 0;
+            }
+            else
+            {
+                double[] fall_input = new double[257];
+                Array.Copy(FFT_buffer, 258, fall_input, 0, 257);
+
+                out_prob[1, 0] = Predict(
+                    fall_input,
+                    Fall_ModelWeights.Layer0_Weights,
+                    Fall_ModelWeights.Layer0_Biases,
+                    Fall_ModelWeights.Layer1_Weights,
+                    Fall_ModelWeights.Layer1_Biases
+                );
+                out_prob[1, 1] = 1.0f - out_prob[1, 0];
+
+                // calculate explaination
+                if (explainview.IsDisposed == false)
+                {
+                    explainview.set_fall_local_explain(
+                        LocalFeatureContribution(
+                        fall_input,
+                        Fall_ModelWeights.Layer0_Weights,
+                        Fall_ModelWeights.Layer0_Biases,
+                        Fall_ModelWeights.Layer1_Weights,
+                        Fall_ModelWeights.Layer1_Biases
+                         )
+                    );
+                }
+
+                SetaiMessage("Bio result: [" + out_prob[0, 1].ToString("F5") + "," + out_prob[0, 0].ToString("F5") + "] , Fall result: [" + out_prob[1, 1].ToString("F5") + "," + out_prob[1, 0].ToString("F5") + "]");
+
             }
         }
     }

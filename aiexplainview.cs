@@ -33,8 +33,8 @@ namespace serial_FFT_plotter
         int global_show_mode = 0;
         int local_show_mode = 0;
 
-        int valid_local_fall = 0;
-        int valid_local_bio = 0;
+        public int valid_local_fall = 0;
+        public int valid_local_bio = 0;
 
         public aiexplainview()
         {
