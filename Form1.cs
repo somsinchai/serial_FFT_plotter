@@ -1,23 +1,21 @@
-﻿using MathNet.Numerics;
-using MathNet.Numerics.IntegralTransforms;
+﻿using MathNet.Numerics.IntegralTransforms;
 using MQTTnet;
 using MQTTnet.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TestMQTTWindows.Models;
+using System.Linq;
+using System.Globalization;
 
 namespace serial_FFT_plotter
 {
@@ -71,6 +69,9 @@ namespace serial_FFT_plotter
 
         const int bt01_signal_size = 129;
         const int bt02_signal_size = 257;
+
+        bool auto_explain_data_enable = false;
+        aiexplainview explainview = new aiexplainview();
 
         public Form1()
         {
@@ -182,7 +183,7 @@ namespace serial_FFT_plotter
                         if (auto_export_data_enable == true)
                         {
                             bool save_require = true;
-                            if (ask_before_save_but.Checked == true)
+                            if (askBeforeSaveToolStripMenuItem.Checked == true)
                             {
                                 DialogResult dialogResult = MessageBox.Show("Do you want to save this signal", "Save file confirm", MessageBoxButtons.YesNo);
                                 if(dialogResult != DialogResult.Yes)
@@ -210,7 +211,7 @@ namespace serial_FFT_plotter
                                 }
                                 outputFile.Close();
 
-                                if (export_bt01_bt02_but.Checked == true)
+                                if (exportBT01BT02ToolStripMenuItem.Checked == true)
                                 {
                                     string bt01_save_file_name = Path.GetDirectoryName(auto_export_save_dialog.FileName) + "\\" + Path.GetFileNameWithoutExtension(auto_export_save_dialog.FileName) + auto_export_counter.ToString("D5") + "_bt01.csv";
                                     StreamWriter bt01_outputFile = new StreamWriter(bt01_save_file_name);
@@ -514,7 +515,7 @@ namespace serial_FFT_plotter
                 max = 0.000001F;
             }
 
-            if (fft_log_scale_but.Checked == true)
+            if (fFTLogScaleToolStripMenuItem.Checked == true)
             {
                 max = (float)Math.Log(max);
             }
@@ -530,7 +531,7 @@ namespace serial_FFT_plotter
                 for (int i = 2; i < open_size / 2; i++)
                 {
                     float draw_y = base_line_y - (FFT_buffer[i] * line_y_draw_multipiler);
-                    if(fft_log_scale_but.Checked == true)
+                    if(fFTLogScaleToolStripMenuItem.Checked == true)
                     {
                         draw_y = base_line_y - ((float)Math.Log(FFT_buffer[i]) * line_y_draw_multipiler);
                     }
@@ -547,7 +548,7 @@ namespace serial_FFT_plotter
                     e.Graphics.DrawLine(Pens.LightBlue, i, draw_y, i, FFT_pic.Height);
                 }
 
-                if(mark_index_129_but.Checked == true)
+                if(markIndex129BT01BT02ToolStripMenuItem.Checked == true)
                 {
                     e.Graphics.DrawLine(Pens.LightBlue, 129, 0, 129, FFT_pic.Height);
                 }
@@ -555,7 +556,7 @@ namespace serial_FFT_plotter
             else // graph chart
             {
                 float last_draw_y = base_line_y - (FFT_buffer[0] * line_y_draw_multipiler);
-                if (fft_log_scale_but.Checked == true)
+                if (fFTLogScaleToolStripMenuItem.Checked == true)
                 {
                     last_draw_y = base_line_y - ((float)Math.Log(FFT_buffer[0]) * line_y_draw_multipiler);
                 }
@@ -563,7 +564,7 @@ namespace serial_FFT_plotter
                 for (int i = 1; i < open_size / 2; i++)
                 {
                     float draw_y = base_line_y - (FFT_buffer[i] * line_y_draw_multipiler);
-                    if (fft_log_scale_but.Checked == true)
+                    if (fFTLogScaleToolStripMenuItem.Checked == true)
                     {
                         draw_y = base_line_y - ((float)Math.Log(FFT_buffer[i]) * line_y_draw_multipiler);
                     }
@@ -582,7 +583,7 @@ namespace serial_FFT_plotter
                     last_draw_y = draw_y;
                 }
 
-                if (mark_index_129_but.Checked == true)
+                if (markIndex129BT01BT02ToolStripMenuItem.Checked == true)
                 {
                     e.Graphics.DrawLine(Pens.LightBlue, 129*2, 0, 129*2, FFT_pic.Height);
                 }
@@ -797,7 +798,7 @@ namespace serial_FFT_plotter
 
             sampling_selected_max_text.Text = "max(" + (record_data.Count - open_size).ToString() + ")";
             button7.Enabled = true;
-            button8.Enabled = true;
+            //button8.Enabled = true;
             trackBar1.Enabled = true;
             track_bar_num.Enabled = true;
             num_bar_draw = true;
@@ -888,7 +889,7 @@ namespace serial_FFT_plotter
             FFT_recieved_size = open_size;
 
             cursor_mode = true;
-            button9.Enabled = true;
+            //button9.Enabled = true;
             FFT_pic.Invalidate();
         }
 
@@ -1063,7 +1064,7 @@ namespace serial_FFT_plotter
             FFT_recieved_size = open_size;
 
             cursor_mode = true;
-            button9.Enabled = true;
+            //button9.Enabled = true;
             FFT_pic.Invalidate();
         }
 
@@ -1126,12 +1127,12 @@ namespace serial_FFT_plotter
             if(FFT_style == 0)
             {
                 FFT_style = 1;
-                fft_style_but.Text = "switch FFT style (graph)";
+                switchFFTStylebarToolStripMenuItem.Text = "switch FFT style (graph)";
             }
             else
             {
                 FFT_style = 0;
-                fft_style_but.Text = "switch FFT style (bar)";
+                switchFFTStylebarToolStripMenuItem.Text = "switch FFT style (bar)";
             }
 
             FFT_pic.Invalidate();
@@ -1145,6 +1146,339 @@ namespace serial_FFT_plotter
         private void mark_index_129_but_CheckedChanged(object sender, EventArgs e)
         {
             FFT_pic.Invalidate();
+        }
+
+        private void openDataFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button6_Click(null, null); 
+        }
+
+        private void openFFTFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button10_Click(null, null);
+        }
+
+        private void cropDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button8_Click(null, null);
+        }
+
+        private void saveFFTFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button9_Click(null, null);
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            radioButton1_CheckedChanged(null, null);
+        }
+
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            radioButton2_CheckedChanged(null, null);
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            radioButton3_CheckedChanged(null, null);
+        }
+
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            radioButton4_CheckedChanged(null, null);
+        }
+
+        private void fFTLogScaleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            fFTLogScaleToolStripMenuItem.Checked = !fFTLogScaleToolStripMenuItem.Checked;
+            FFT_pic.Invalidate();
+
+        }
+
+        private void markIndex129BT01BT02ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            markIndex129BT01BT02ToolStripMenuItem.Checked = !markIndex129BT01BT02ToolStripMenuItem.Checked;
+            FFT_pic.Invalidate();
+        }
+
+        private void markIndex257BT030BT04ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            markIndex257BT030BT04ToolStripMenuItem.Checked = !markIndex257BT030BT04ToolStripMenuItem.Checked;
+            FFT_pic.Invalidate();
+        }
+
+        private void switchFFTStylebarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (FFT_style == 0)
+            {
+                FFT_style = 1;
+                switchFFTStylebarToolStripMenuItem.Text = "switch FFT style (graph)";
+            }
+            else
+            {
+                FFT_style = 0;
+                switchFFTStylebarToolStripMenuItem.Text = "switch FFT style (bar)";
+            }
+
+            FFT_pic.Invalidate();
+        }
+
+        private void SetaiMessage(string message)
+        {
+            ai_message_box.Text = message;
+        }
+
+        private void inferenceUsingBTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            double[] inputData = new double[258];
+
+            if (csv_opener.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(csv_opener.FileName);
+
+            if (lines.Length > 0)
+            {
+                string firstLine = lines[0];  // take the first row (or loop if you want batch inputs)
+                inputData = firstLine
+                    .Split(',')                                // split by comma
+                    .Select(s => double.Parse(s, CultureInfo.InvariantCulture))  // convert to float
+                    .ToArray();
+            }
+
+            double[] out_prob = new double[] { 0, 0 };
+
+            out_prob[0] = Predict(
+                inputData,
+                Bio_ModelWeights.Layer0_Weights,
+                Bio_ModelWeights.Layer0_Biases,
+                Bio_ModelWeights.Layer1_Weights,
+                Bio_ModelWeights.Layer1_Biases
+            );
+
+            out_prob[1] = 1.0f - out_prob[0];
+
+            SetaiMessage("bio Inference result: [" + out_prob[1].ToString() + "," + out_prob[0].ToString() + "]");
+
+            // show to FFT view
+            for(int i = 0; i < 258; i++)
+            {
+                FFT_buffer[i] = (float)inputData[i];
+            }
+            open_size = 1024;
+            FFT_recieved_size = 1024;
+            FFT_pic.Invalidate();
+
+            // calculate explaination
+            if (explainview.IsDisposed == false)
+            {
+                explainview.set_bio_local_explain(
+                    LocalFeatureContribution(
+                    inputData,
+                    Bio_ModelWeights.Layer0_Weights,
+                    Bio_ModelWeights.Layer0_Biases,
+                    Bio_ModelWeights.Layer1_Weights,
+                    Bio_ModelWeights.Layer1_Biases
+                     )
+                );
+            }
+        }
+
+        private void inferenceUsingBTFallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            double[] inputData = new double[257];
+
+            if (csv_opener.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(csv_opener.FileName);
+
+            if (lines.Length > 0)
+            {
+                string firstLine = lines[0];  // take the first row (or loop if you want batch inputs)
+                inputData = firstLine
+                    .Split(',')                                // split by comma
+                    .Select(s => double.Parse(s, CultureInfo.InvariantCulture))  // convert to float
+                    .ToArray();
+            }
+
+            double[] selected_input = new double[257];
+            Array.Copy(inputData, 0, selected_input, 0, 257); // Copy indices 0 to 256
+
+            double[] out_prob = new double[] { 0, 0 };
+
+            out_prob[0] = Predict(
+                inputData,
+                Fall_ModelWeights.Layer0_Weights,
+                Fall_ModelWeights.Layer0_Biases,
+                Fall_ModelWeights.Layer1_Weights,
+                Fall_ModelWeights.Layer1_Biases
+            );
+
+            out_prob[1] = 1.0f - out_prob[0];
+
+            ai_message_box.Text = "fall Inference result: [" + out_prob[1].ToString() + "," + out_prob[0].ToString() + "]";
+
+            // show to FFT view
+            for (int i = 0; i < 257; i++)
+            {
+                FFT_buffer[257 + i] = (float)inputData[i];
+            }
+            open_size = 1024;
+            FFT_recieved_size = 1024;
+            FFT_pic.Invalidate();
+
+            // calculate explaination
+            if (explainview.IsDisposed == false)
+            {
+                explainview.set_fall_local_explain(
+                    LocalFeatureContribution(
+                    selected_input,
+                    Fall_ModelWeights.Layer0_Weights,
+                    Fall_ModelWeights.Layer0_Biases,
+                    Fall_ModelWeights.Layer1_Weights,
+                    Fall_ModelWeights.Layer1_Biases
+                     )
+                );
+            }
+        }
+
+   
+        public static double Predict(
+            double[] input,
+            double[,] Layer0_Weights,
+            double[] Layer0_Biases,
+            double[,] Layer1_Weights,
+            double[] Layer1_Biases)
+        {
+
+            // Layer 0: input → hidden
+            int c = Layer0_Weights.GetLength(0);
+            int r = Layer0_Weights.GetLength(1);           
+            double[] hidden_raw = new double[r];
+            double output_raw = -99.99;
+            for (int i=0;i< r; i++)
+            { 
+                double sum = Layer0_Biases[i];
+                for(int j = 0; j < c; j++)
+                {
+                    sum += Layer0_Weights[j, i] * input[j];
+                }
+                hidden_raw[i] = Math.Tanh(sum);
+            }
+
+            // Layer 1: hidden → output (no activation or softmax handled outside)
+            c = Layer1_Weights.GetLength(0);
+            r = Layer1_Weights.GetLength(1);
+            for (int i = 0; i < r; i++)
+            {
+                double sum = Layer1_Biases[i];
+                for (int j = 0; j < c; j++)
+                {
+                    sum += Layer1_Weights[j, i] * hidden_raw[j];
+                }
+                output_raw = sum;
+            }
+
+            return 1.0f / (1.0f + Math.Exp(-output_raw));
+        }
+
+        public static double Sigmoid(double x) => 1.0 / (1.0 + Math.Exp(-x));
+
+        public static double[] LocalFeatureContribution(
+        double[] input,            // input vector, size n
+        double[,] W1, double[] b1, // weights and bias of layer 1 (W1: [n,h])
+        double[,] W2, double[] b2 // weights and bias of layer 2 (W2: [h,o])
+        )
+        {
+            
+            int inputSize = input.Length;
+            int hiddenSize = b1.Length;
+            int outputSize = b2.Length;
+
+            double[] hiddenRaw = new double[hiddenSize];
+            double[] hidden = new double[hiddenSize];
+            double[] outputRaw = new double[outputSize];
+            double[] output = new double[outputSize];
+
+            // Input → Hidden (tanh)
+            for (int j = 0; j < hiddenSize; j++)
+            {
+                hiddenRaw[j] = b1[j];
+                for (int i = 0; i < inputSize; i++)
+                {
+                    hiddenRaw[j] += input[i] * W1[i, j];
+                }
+                hidden[j] = Math.Tanh(hiddenRaw[j]); // activation for hidden layer
+            }
+
+            // Hidden → Output (sigmoid)
+            for (int k = 0; k < outputSize; k++)
+            {
+                outputRaw[k] = b2[k];
+                for (int j = 0; j < hiddenSize; j++)
+                {
+                    outputRaw[k] += hidden[j] * W2[j, k];
+                }
+                output[k] = Sigmoid(outputRaw[k]); // activation for output layer
+            }
+
+            // Compute contribution from input -> hidden -> output, ignoring tanh derivative
+            double[] contribution = new double[inputSize];
+            for (int i = 0; i < inputSize; i++)
+            {
+                double sum = 0;
+                for (int j = 0; j < hiddenSize; j++)
+                {
+                    sum += W1[i, j] * W2[j,0] * hidden[j];  // Use activated value
+                }
+                contribution[i] = input[i] * sum;
+            }
+
+            return contribution;
+        }
+
+        private void aIExplainableViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(explainview.IsDisposed == true)
+            {
+                explainview = new aiexplainview();
+            }
+            explainview.Show();
+        }
+
+        private void askBeforeSaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            askBeforeSaveToolStripMenuItem.Checked = !askBeforeSaveToolStripMenuItem.Checked;
+        }
+
+        private void exportBT01BT02ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            exportBT01BT02ToolStripMenuItem.Checked = !exportBT01BT02ToolStripMenuItem.Checked;
+        }
+
+        private void exportBT03BT04ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            exportBT03BT04ToolStripMenuItem.Checked = !exportBT03BT04ToolStripMenuItem.Checked;
+        }
+
+        private void button2_Click_3(object sender, EventArgs e)
+        {
+            if (auto_explain_data_enable == false)
+            {
+                auto_explain_data_enable = true;
+                auto_explain_but.BackColor = Color.LightGreen;
+            }
+            else
+            {
+
+                auto_explain_data_enable = false;
+                auto_explain_but.BackColor = SystemColors.Control;
+            }
         }
     }
 }
