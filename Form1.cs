@@ -1428,52 +1428,6 @@ namespace serial_FFT_plotter
 
         }
 
-        public static double Predict(
-            double[] input,
-            double[,] Layer0_Weights,
-            double[] Layer0_Biases,
-            double[,] Layer1_Weights,
-            double[] Layer1_Biases,
-            double[,] Layer2_Weights,
-            double[] Layer2_Biases)
-        {
-
-            int input_length = Layer0_Weights.GetLength(0);
-            int l1_length = Layer0_Weights.GetLength(1);
-            int l2_length = Layer1_Weights.GetLength(1);
-
-            double[] x = new double[input_length];
-            double[] h1 = new double[l1_length]; // 32
-            double[] h2 = new double[l2_length]; // 16
-
-            // Layer 0: Input -> 32
-            for (int j = 0; j < h1.Length; j++)
-            {
-                double sum = Layer0_Biases[j];
-                for (int i = 0; i < input_length; i++)
-                    sum += x[i] * Layer0_Weights[i, j];
-                h1[j] = Relu(sum);
-            }
-
-            // Layer 1: 32 -> 16
-            for (int j = 0; j < h2.Length; j++)
-            {
-                double sum = Layer1_Biases[j];
-                for (int i = 0; i < h1.Length; i++)
-                    sum += h1[i] * Layer1_Weights[i, j];
-                h2[j] = Relu(sum);
-            }
-
-            // Layer 2: 16 -> 1
-            double output = Layer2_Biases[0];
-            for (int i = 0; i < h2.Length; i++)
-                output += h2[i] * Layer2_Weights[i, 0];
-
-            // Sigmoid for probability
-            return Sigmoid(output);
-
-        }
-
         public static double Sigmoid(double x) => 1.0 / (1.0 + Math.Exp(-x));
 
         public static double[] LocalFeatureContribution(
@@ -1620,8 +1574,12 @@ namespace serial_FFT_plotter
             }
             else
             {
-                double[] fall_input = new double[257];
-                Array.Copy(FFT_buffer, 258, fall_input, 0, 257);
+                //double[] fall_input = new double[257];
+                //Array.Copy(FFT_buffer, 258, fall_input, 0, 257);
+
+                double[] fall_input = new double[123];
+                Array.Copy(FFT_buffer, 258 + 0, fall_input, 0, 20);
+                Array.Copy(FFT_buffer, 258 + 155, fall_input, 20, 103);
 
                 out_prob[1, 0] = Predict(
                     fall_input,
