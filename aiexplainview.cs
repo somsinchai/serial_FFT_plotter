@@ -12,18 +12,22 @@ namespace serial_FFT_plotter
 {
     public partial class aiexplainview : Form
     {
-        static int bio_nFeatures = Bio_ModelWeights.Layer0_Weights.GetLength(0);
-        static int bio_nHidden = Bio_ModelWeights.Layer0_Weights.GetLength(1);
-        static int fall_nFeatures = Fall_ModelWeights.Layer0_Weights.GetLength(0);
-        static int fall_nHidden = Fall_ModelWeights.Layer0_Weights.GetLength(1);
+        static int bio_nFeatures = Bio_ModelWeights.W0.GetLength(0);
+        static int bio_nHidden = Bio_ModelWeights.W0.GetLength(1);
+        static int fall_nFeatures = Fall_ModelWeights.W0.GetLength(0);
+        static int fall_nHidden = Fall_ModelWeights.W0.GetLength(1);
 
         double[] bio_featureImportance = new double[bio_nFeatures];
         double[] bio_positiveContrib = new double[bio_nFeatures];
         double[] bio_negativeContrib = new double[bio_nFeatures];
+        double bio_Contrib_max;
+        double bio_Contrib_min;
 
         double[] fall_featureImportance = new double[fall_nFeatures];
         double[] fall_positiveContrib = new double[fall_nFeatures];
         double[] fall_negativeContrib = new double[fall_nFeatures];
+        double fall_Contrib_max;
+        double fall_Contrib_min;
 
         double[] bio_inference_contibute = new double[bio_nFeatures];
         double[] fall_inference_contibute = new double[fall_nFeatures];
@@ -31,7 +35,6 @@ namespace serial_FFT_plotter
         string[] global_show_mode_name = new string[] { "Magnitude Contribution (w/positive weight)", "Magnitude Contribution (w/negative weight)", "Positive Contribution", "Negative Contribution" };
 
         int global_show_mode = 0;
-        int local_show_mode = 0;
 
         public int valid_local_fall = 0;
         public int valid_local_bio = 0;
@@ -64,7 +67,7 @@ namespace serial_FFT_plotter
                 double sum = 0;
                 for (int j = 0; j < bio_nHidden; j++)
                 {
-                    sum += Bio_ModelWeights.Layer0_Weights[i, j] * Bio_ModelWeights.Layer1_Weights[j, 0];
+                    sum += Bio_ModelWeights.W0[i, j] * Bio_ModelWeights.W1[j, 0];
                 }
 
                 if (sum > 0)
@@ -83,7 +86,7 @@ namespace serial_FFT_plotter
                 double sum = 0;
                 for (int j = 0; j < fall_nHidden; j++)
                 {
-                    sum += Fall_ModelWeights.Layer0_Weights[i, j] * Fall_ModelWeights.Layer1_Weights[j, 0];
+                    sum += Fall_ModelWeights.W0[i, j] * Fall_ModelWeights.W1[j, 0];
                 }
 
                 if (sum > 0)

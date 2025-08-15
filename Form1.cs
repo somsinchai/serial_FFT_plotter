@@ -1257,10 +1257,14 @@ namespace serial_FFT_plotter
 
             out_prob[0] = Predict(
                 inputData,
-                Bio_ModelWeights.Layer0_Weights,
-                Bio_ModelWeights.Layer0_Biases,
-                Bio_ModelWeights.Layer1_Weights,
-                Bio_ModelWeights.Layer1_Biases
+                Bio_ModelWeights.ScalerMean,
+                Bio_ModelWeights.ScalerScale,
+                Bio_ModelWeights.W0,
+                Bio_ModelWeights.B0,
+                Bio_ModelWeights.W1,
+                Bio_ModelWeights.B1,
+                Bio_ModelWeights.W2,
+                Bio_ModelWeights.B2
             );
 
             out_prob[1] = 1.0f - out_prob[0];
@@ -1277,18 +1281,22 @@ namespace serial_FFT_plotter
             FFT_pic.Invalidate();
 
             // calculate explaination
-            if (explainview.IsDisposed == false)
-            {
-                explainview.set_bio_local_explain(
-                    LocalFeatureContribution(
-                    inputData,
-                    Bio_ModelWeights.Layer0_Weights,
-                    Bio_ModelWeights.Layer0_Biases,
-                    Bio_ModelWeights.Layer1_Weights,
-                    Bio_ModelWeights.Layer1_Biases
-                     )
-                );
-            }
+            //if (explainview.IsDisposed == false)
+            //{
+            //    explainview.set_bio_local_explain(
+            //        LocalFeatureContribution(
+            //        inputData,
+            //        Bio_ModelWeights.ScalerMean,
+            //        Bio_ModelWeights.ScalerScale,
+            //        Bio_ModelWeights.W0,
+            //        Bio_ModelWeights.B0,
+            //        Bio_ModelWeights.W1,
+            //        Bio_ModelWeights.B1,
+            //        Bio_ModelWeights.W2,
+            //        Bio_ModelWeights.B2
+            //         )
+            //    );
+            //}
         }
 
         private void inferenceUsingBTFallToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1311,17 +1319,22 @@ namespace serial_FFT_plotter
                     .ToArray();
             }
 
-            double[] selected_input = new double[257];
-            Array.Copy(inputData, 0, selected_input, 0, 257); // Copy indices 0 to 256
+            double[] selected_input = new double[123];
+            Array.Copy(inputData, 0, selected_input, 0, 20);
+            Array.Copy(inputData, 155, selected_input, 20, 103);
 
             double[] out_prob = new double[] { 0, 0 };
 
             out_prob[0] = Predict(
-                inputData,
-                Fall_ModelWeights.Layer0_Weights,
-                Fall_ModelWeights.Layer0_Biases,
-                Fall_ModelWeights.Layer1_Weights,
-                Fall_ModelWeights.Layer1_Biases
+                selected_input,
+                Fall_ModelWeights.ScalerMean,
+                Fall_ModelWeights.ScalerScale,
+                Fall_ModelWeights.W0,
+                Fall_ModelWeights.B0,
+                Fall_ModelWeights.W1,
+                Fall_ModelWeights.B1,
+                Fall_ModelWeights.W2,
+                Fall_ModelWeights.B2
             );
 
             out_prob[1] = 1.0f - out_prob[0];
@@ -1338,66 +1351,137 @@ namespace serial_FFT_plotter
             FFT_pic.Invalidate();
 
             // calculate explaination
-            if (explainview.IsDisposed == false)
-            {
-                explainview.set_fall_local_explain(
-                    LocalFeatureContribution(
-                    selected_input,
-                    Fall_ModelWeights.Layer0_Weights,
-                    Fall_ModelWeights.Layer0_Biases,
-                    Fall_ModelWeights.Layer1_Weights,
-                    Fall_ModelWeights.Layer1_Biases
-                     )
-                );
-            }
+            //if (explainview.IsDisposed == false)
+            //{
+            //    explainview.set_fall_local_explain(
+            //        LocalFeatureContribution(
+            //        selected_input,
+            //        Fall_ModelWeights.ScalerMean,
+            //        Fall_ModelWeights.ScalerScale,
+            //        Fall_ModelWeights.W0,
+            //        Fall_ModelWeights.B0,
+            //        Fall_ModelWeights.W1,
+            //        Fall_ModelWeights.B1,
+            //        Fall_ModelWeights.W2,
+            //        Fall_ModelWeights.B2
+            //         )
+            //    );
+            //}
         }
 
+        public static double Relu(double x)
+        {
+            return x > 0 ? x : 0;
+        }
+
+
+
+        public static double Predict(
+            double[] input,
+            double[] mean,
+            double[] scale,
+            double[,] Layer0_Weights,
+            double[] Layer0_Biases,
+            double[,] Layer1_Weights,
+            double[] Layer1_Biases,
+            double[,] Layer2_Weights,
+            double[] Layer2_Biases)
+        {
+
+            int input_length = Layer0_Weights.GetLength(0);
+            int l1_length = Layer0_Weights.GetLength(1);
+            int l2_length = Layer1_Weights.GetLength(1);
+
+            double[] x = new double[input_length];
+            double[] h1 = new double[l1_length]; // 32
+            double[] h2 = new double[l2_length]; // 16
+
+            // Normalize input
+            for (int i = 0; i < input_length; i++)
+                x[i] = (input[i] - mean[i]) / scale[i];
+
+            // Layer 0: Input -> 32
+            for (int j = 0; j < h1.Length; j++)
+            {
+                double sum = Layer0_Biases[j];
+                for (int i = 0; i < input_length; i++)
+                    sum += x[i] * Layer0_Weights[i,j];
+                h1[j] = Relu(sum);
+            }
+
+            // Layer 1: 32 -> 16
+            for (int j = 0; j < h2.Length; j++)
+            {
+                double sum = Layer1_Biases[j];
+                for (int i = 0; i < h1.Length; i++)
+                    sum += h1[i] * Layer1_Weights[i,j];
+                h2[j] = Relu(sum);
+            }
+
+            // Layer 2: 16 -> 1
+            double output = Layer2_Biases[0];
+            for (int i = 0; i < h2.Length; i++)
+                output += h2[i] * Layer2_Weights[i,0];
+
+            // Sigmoid for probability
+            return Sigmoid(output);
+
+        }
 
         public static double Predict(
             double[] input,
             double[,] Layer0_Weights,
             double[] Layer0_Biases,
             double[,] Layer1_Weights,
-            double[] Layer1_Biases)
+            double[] Layer1_Biases,
+            double[,] Layer2_Weights,
+            double[] Layer2_Biases)
         {
 
-            // Layer 0: input → hidden
-            int c = Layer0_Weights.GetLength(0);
-            int r = Layer0_Weights.GetLength(1);
-            double[] hidden_raw = new double[r];
-            double output_raw = -99.99;
-            for (int i = 0; i < r; i++)
+            int input_length = Layer0_Weights.GetLength(0);
+            int l1_length = Layer0_Weights.GetLength(1);
+            int l2_length = Layer1_Weights.GetLength(1);
+
+            double[] x = new double[input_length];
+            double[] h1 = new double[l1_length]; // 32
+            double[] h2 = new double[l2_length]; // 16
+
+            // Layer 0: Input -> 32
+            for (int j = 0; j < h1.Length; j++)
             {
-                double sum = Layer0_Biases[i];
-                for (int j = 0; j < c; j++)
-                {
-                    sum += Layer0_Weights[j, i] * input[j];
-                }
-                hidden_raw[i] = Math.Tanh(sum);
+                double sum = Layer0_Biases[j];
+                for (int i = 0; i < input_length; i++)
+                    sum += x[i] * Layer0_Weights[i, j];
+                h1[j] = Relu(sum);
             }
 
-            // Layer 1: hidden → output (no activation or softmax handled outside)
-            c = Layer1_Weights.GetLength(0);
-            r = Layer1_Weights.GetLength(1);
-            for (int i = 0; i < r; i++)
+            // Layer 1: 32 -> 16
+            for (int j = 0; j < h2.Length; j++)
             {
-                double sum = Layer1_Biases[i];
-                for (int j = 0; j < c; j++)
-                {
-                    sum += Layer1_Weights[j, i] * hidden_raw[j];
-                }
-                output_raw = sum;
+                double sum = Layer1_Biases[j];
+                for (int i = 0; i < h1.Length; i++)
+                    sum += h1[i] * Layer1_Weights[i, j];
+                h2[j] = Relu(sum);
             }
 
-            return 1.0f / (1.0f + Math.Exp(-output_raw));
+            // Layer 2: 16 -> 1
+            double output = Layer2_Biases[0];
+            for (int i = 0; i < h2.Length; i++)
+                output += h2[i] * Layer2_Weights[i, 0];
+
+            // Sigmoid for probability
+            return Sigmoid(output);
+
         }
 
         public static double Sigmoid(double x) => 1.0 / (1.0 + Math.Exp(-x));
 
         public static double[] LocalFeatureContribution(
         double[] input,            // input vector, size n
+        double[] mean , double[] scale,
         double[,] W1, double[] b1, // weights and bias of layer 1 (W1: [n,h])
-        double[,] W2, double[] b2 // weights and bias of layer 2 (W2: [h,o])
+        double[,] W2, double[] b2, // weights and bias of layer 2 (W2: [h,o])
+        double[,] W3, double[] b3 // weights and bias of layer 2 (W2: [h,o])
         )
         {
 
@@ -1500,10 +1584,14 @@ namespace serial_FFT_plotter
 
             out_prob[0, 0] = Predict(
                 bio_input,
-                Bio_ModelWeights.Layer0_Weights,
-                Bio_ModelWeights.Layer0_Biases,
-                Bio_ModelWeights.Layer1_Weights,
-                Bio_ModelWeights.Layer1_Biases
+                Bio_ModelWeights.ScalerMean,
+                Bio_ModelWeights.ScalerScale,
+                Bio_ModelWeights.W0,
+                Bio_ModelWeights.B0,
+                Bio_ModelWeights.W1,
+                Bio_ModelWeights.B1,
+                Bio_ModelWeights.W2,
+                Bio_ModelWeights.B2
             );
             out_prob[0, 1] = 1.0f - out_prob[0, 0];
 
@@ -1513,10 +1601,14 @@ namespace serial_FFT_plotter
                 explainview.set_bio_local_explain(
                     LocalFeatureContribution(
                     bio_input,
-                    Bio_ModelWeights.Layer0_Weights,
-                    Bio_ModelWeights.Layer0_Biases,
-                    Bio_ModelWeights.Layer1_Weights,
-                    Bio_ModelWeights.Layer1_Biases
+                    Bio_ModelWeights.ScalerMean,
+                    Bio_ModelWeights.ScalerScale,
+                    Bio_ModelWeights.W0,
+                    Bio_ModelWeights.B0,
+                    Bio_ModelWeights.W1,
+                    Bio_ModelWeights.B1,
+                    Bio_ModelWeights.W2,
+                    Bio_ModelWeights.B2
                      )
                 );
             }
@@ -1533,10 +1625,14 @@ namespace serial_FFT_plotter
 
                 out_prob[1, 0] = Predict(
                     fall_input,
-                    Fall_ModelWeights.Layer0_Weights,
-                    Fall_ModelWeights.Layer0_Biases,
-                    Fall_ModelWeights.Layer1_Weights,
-                    Fall_ModelWeights.Layer1_Biases
+                    Fall_ModelWeights.ScalerMean,
+                    Fall_ModelWeights.ScalerScale,
+                    Fall_ModelWeights.W0,
+                    Fall_ModelWeights.B0,
+                    Fall_ModelWeights.W1,
+                    Fall_ModelWeights.B1,
+                    Fall_ModelWeights.W2,
+                    Fall_ModelWeights.B2
                 );
                 out_prob[1, 1] = 1.0f - out_prob[1, 0];
 
@@ -1546,10 +1642,14 @@ namespace serial_FFT_plotter
                     explainview.set_fall_local_explain(
                         LocalFeatureContribution(
                         fall_input,
-                        Fall_ModelWeights.Layer0_Weights,
-                        Fall_ModelWeights.Layer0_Biases,
-                        Fall_ModelWeights.Layer1_Weights,
-                        Fall_ModelWeights.Layer1_Biases
+                        Fall_ModelWeights.ScalerMean,
+                        Fall_ModelWeights.ScalerScale,
+                        Fall_ModelWeights.W0,
+                        Fall_ModelWeights.B0,
+                        Fall_ModelWeights.W1,
+                        Fall_ModelWeights.B1,
+                        Fall_ModelWeights.W2,
+                        Fall_ModelWeights.B2
                          )
                     );
                 }
